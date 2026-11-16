@@ -1,0 +1,24 @@
+\subsection{拓展实验 C：离事后最优还有多远}
+
+\begin{table*}[t]
+	\centering
+	\caption{事后最优区间与在线策略（5 个测试日均值，与实验一配对）。“KM”“Q-KM”列为收入占 LB 的百分比；“弥合”为 Q-KM 弥合的 (LB$-$KM) 缺口比例。$^\dagger$：该设置有 4 天 MILP 在 400\,s 内未收敛，只报 UB，比例以 UB 为分母（是达成率的下界）}
+	\label{tab:hindsight}
+	\small
+	\setlength{\tabcolsep}{5pt}
+	{\begin{tabular}{c cccc cccc cccc}
+		\toprule
+		& \multicolumn{4}{c}{40 辆} & \multicolumn{4}{c}{60 辆} & \multicolumn{4}{c}{100 辆} \\
+		\cmidrule(lr){2-5}\cmidrule(lr){6-9}\cmidrule(lr){10-13}
+		$\Dt$ & [LB, UB]/千元 & KM & Q-KM & 弥合 & [LB, UB]/千元 & KM & Q-KM & 弥合 & [LB, UB]/千元 & KM & Q-KM & 弥合 \\
+		\midrule
+		\tabinput{tables/exp5.tex}
+		\bottomrule
+	\end{tabular}}
+\end{table*}
+
+\Cref{tab:hindsight} 给出了 \cref{sec:hindsight} 的事后最优区间。LB 是一个可执行的事后计划，因而真实的事后最优不低于 LB；表中以 LB 为分母的达成率因此是\textbf{偏乐观的}，在线策略离最优的实际差距只会更大。除 100 辆、$\Dt=10$ 外，所有 LB 都由 MILP 求到最优，回放仿真器后收入与 LB 逐日一致。
+
+\textbf{运力紧张、批次较密时，短视的代价最大。} $\Dt=10$ 时，即使只用接驾按最坏情况计的保守计划，事后也能拿到 \num{17416} 元（40 辆）和 \num{20602} 元（60 辆）。KM 即时收入只达到其中的 71\% 和 81\%，Q-KM 达到 81\% 和 85\%，即 Q-KM 弥合了 KM 与事后最优之间 33\% 和 18\% 的缺口。这说明 Q-KM 的长期价值确实把策略推向了离线最优的方向，但仍有至少 15\%–19\% 的收入因不知道未来而损失；若以 UB 计，Q-KM 只达到 73\%/79\%。100 辆车时 KM 已达到 UB 的 87\%，Q-KM 没有额外收益，与实验一中“运力充足时长期价值无用”的结论一致。
+
+\textbf{大批次间隔下的损失主要是结构性的。} $\Dt$ 从 10 增大到 30 分钟，事后最优本身就下降约三分之一（40 辆的 LB 从 \num{17416} 降至 \num{11407} 元，60 辆从 \num{20602} 降至 \num{13425} 元）。此时上下界只相差 4\%–5\%，在线策略的达成率反而升高到 80\%–93\%。也就是说，实验一中 $\Dt=30$ 时的收入骤降，大部分是“订单在下一批次前就已取消”造成的，即便事先知道全部订单也无法挽回，并不是派单算法的失误。批次间隔这一\textbf{系统设计参数}，比在给定间隔下改进匹配算法更重要。

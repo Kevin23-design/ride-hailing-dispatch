@@ -1,0 +1,63 @@
+\section{问题建模与方法}
+
+\subsection{数据与仿真环境}\label{sec:data}
+
+同一用户在同一天内相邻两次签到，若间隔 10–180 分钟且曼哈顿距离不小于 1\,km，就视为一次出行。前一次签到给出上车点与下单时刻，后一次签到给出下车点。按此规则得到 \num{25550} 个订单，覆盖 249 天。按日期划分，前 70\% 的日期（\num{21589} 单）用于训练，后 30\% 的日期（\num{3961} 单）用于测试。车费为 $\text{fare}=5+2\,\ell$ 元，其中 $\ell$ 为送客距离（km）。派单半径 $R=3$\,km，车速 25\,km/h。
+
+全天仿真覆盖 6:00–24:00，每天按历史时间分布有放回抽取 1500 单。第 $t$ 个批次在 $\tau_t=6{:}00+(t+1)\Dt$ 执行，只包含此前已到达的订单。订单等待超过 20 分钟即取消。司机的忙碌时长等于（接驾 + 送客）距离除以车速，按连续分钟计。因此 $\Dt$ 只改变攒批方式，不影响物理行驶时间。原 notebook 在批次开始时就能看到该时间片内的全部订单，相当于“未到先派”，这里去掉了这一前视，因此绝对收入比 notebook 中的数值略低。
+
+\subsection{三种派单策略}
+
+\textbf{最近贪心}：订单按到达顺序逐个派给半径内最近的空闲司机。\textbf{KM 即时收入}：边权 $w_{dj}=\text{fare}_j$，在可行边上求最大权匹配。\textbf{Q-KM}\cite{xu2018large}：状态取 $s=(t,i)$，$i$ 为 $8\times8$ 网格区域；动作为接一个去区域 $k$ 的订单或原地等待。用 Q-learning 学习平台共享的价值表，边权为
+\begin{equation}
+w_{dj}=\text{fare}_j+\beta\big[\gamma^{\Delta_{ik}}V(t{+}\Delta_{ik},k)-\gamma V(t{+}1,i)\big],
+\label{eq:qkm}
+\end{equation}
+其中 $\gamma$ 为每个时间片的折扣，$\gamma=0.92^{\Dt/10}$，保证不同 $\Dt$ 下每分钟的等效折扣相同。$w\le 0$ 的边不连。每种 $(\Dt,\text{车队})$ 用 5 个随机种子各训练 300 个模拟日（$\varepsilon$ 从 0.5 线性衰减到 0.05）。$\beta\in\{0.2,0.4,0.5,0.6,0.8\}$ 在 3 个验证日上选取，不使用测试日。
+
+\subsection{双目标批次派单与进化算法}
+
+某批次有 $n$ 个司机、$m$ 个订单（$n<m$），决策变量 $x_{dj}\in\{0,1\}$：
+\begin{equation}
+\max\ f_1=\sum\ell_j x_{dj},\quad \min\ f_2=\sum p_{dj}x_{dj},
+\label{eq:moo}
+\end{equation}
+约束为每个司机、每个订单至多匹配一次，且每个订单只考虑 $R$ 内最近的 $K=6$ 个候选司机。$f_1$ 按作业要求以送客距离 $\ell$ 表示收入，$p_{dj}$ 为接驾距离。编码为长度 $m$ 的整数向量：第 $j$ 位为 0 表示订单 $j$ 不派，为 $k$ 表示派给第 $k$ 近的候选；解码时若候选冲突就顺延，保证任意基因都可行。NSGA-II/III 的种群为 100、迭代 300 代，采用均匀交叉（概率 0.9）和随机重置变异（概率 $1/m$）。NSGA-III 在两个目标上使用 100 个 Das–Dennis 参考方向。加权和 KM 用 41 个 $\lambda$ 求 $\max\sum(\ell_j-\lambda p_{dj})x_{dj}$。KM 混合初始化从加权和 KM 的解中等间隔取 12 个，编码后放入 NSGA-II 的初始种群。
+
+\subsection{拓展 A：增广 $\varepsilon$-约束精确前沿}\label{sec:exact}
+
+把距离量化为 $0.01$\,km 的整数倍 $G_j=\ell_j/0.01$，$P_{dj}=p_{dj}/0.01$，令 $M=\sum P_{\max}+1$。迭代求解
+\begin{equation}
+\max_{x}\ M\,G^{\top}x-P^{\top}x\quad\text{s.t. 匹配约束},\ P^{\top}x\le\varepsilon ,
+\end{equation}
+每步取 $\varepsilon\leftarrow P^\ast-1$，直到收入为 0。$M$ 足够大，因此目标等价于“先最大化收入，再最小化接驾”的字典序，每个解都是帕累托最优的\cite{mavrotas2009effective}。$M$ 很大时混合整数求解器有数值误差，所以另外用小系数的纯收入目标 $h(\varepsilon)=\max\{G^\top x: P^\top x\le\varepsilon\}$ 逐点验证：对按接驾距离排序的前沿点，要求 $h(P_i)=G_i$（第 $i$ 点在该接驾预算下收入最优）且 $h(P_{i+1}-1)=G_i$（相邻点之间没有遗漏），不满足就补求。求解器为 HiGHS\cite{huangfu2018parallelizing}。在随机小实例上，结果与穷举法得到的前沿完全一致。
+
+\subsection{拓展 B：DV-KM 深度价值网络}\label{sec:dvkm}
+
+表格 Q-KM 有两点局限：价值以区域中心近似，且 TD 目标 $r+\gamma^{\Delta}\max_{a\in\mathcal{A}(s')}Q(s',a)$ 中的 max 在噪声下会产生正偏差\cite{hasselt2010double}。多个司机同时把附近最好的订单当作自己可得的后续收益，偏差在 $\beta$ 较大时会被放大。DV-KM 在连续时空上直接估计行为策略的状态价值 $V_\theta(\tau,x,y)$：
+\begin{itemize}
+	\item \textbf{输入表示}：归一化坐标、时间的 4 阶傅里叶编码，以及 $4/8/16/32$ 四个尺度网格 × 6 个时段的嵌入拼接，即层次粗编码\cite{tang2019deep}；
+	\item \textbf{训练目标}：半马尔可夫 TD(0) 策略评估，$y=r+\gamma_{\min}^{\tau'-\tau}V_{\theta^-}(\tau',x',y')$，不取 max，目标网络 $\theta^-$ 以 Polyak 系数 0.01 更新；
+	\item \textbf{平滑正则}：$\lambda\,\mathbb{E}\,[V(\tau,\bm{u})-V(\tau,\bm{u}+\bm\delta)]^2$，$\bm\delta\sim\mathcal{N}(0,0.5^2)$，作为 Lipschitz 约束的有限差分近似；
+	\item \textbf{广义策略迭代}：第 0 轮用表格 Q-KM 加 20\% 随机 KM 采集 150 天的经验，之后两轮用 DV-KM 加 10\% 探索各采集 100 天，与旧数据合并后热启动训练（约 175 万条经验，3 层 256 维 MLP，单张 RTX 3090）。
+\end{itemize}
+派单时，式~(\ref{eq:qkm}) 中的区域价值换成按每对司机–订单的实际忙碌时长 $\Delta_{dj}$ 和精确目的地计算的 $\gamma_{\min}^{\Delta_{dj}}V_\theta(\tau{+}\Delta_{dj},\bm{u}^{\text{dest}}_j)-\gamma_{\min}^{\Dt}V_\theta(\tau{+}\Dt,\bm{u}_d)$。为把“去掉 max 目标”和“改用网络逼近”两个因素分开，另设对照组 \textbf{表格 PE-KM}：沿用表格结构，但目标改为期望型 $V(s)\leftarrow V(s)+\alpha[r+\gamma^{\Delta}V(s')-V(s)]$。
+
+\subsection{拓展 C：事后最优的上下界}\label{sec:hindsight}
+
+在线策略之间的比较只给出相对的优劣，无法说明离理论最优还有多远。为此，假设全天订单事先已知，在批次网格上构造时间扩展网络：节点 $(j,t)$ 表示订单 $j$ 在批次 $t$ 被派，要求 $m_j\le\tau_t\le m_j+20$；司机 $d$ 到节点 $(j,t)$ 有边，当且仅当初始位置在 $o_j$ 的 $R$ 内；节点 $(j,t)$ 到 $(k,t')$ 有边，当且仅当 $|\text{dest}_j-o_k|_1\le R$ 且 $\tau_t+(\bar p+\ell_j)/v\le\tau_{t'}$。每个司机至多发出一条链，每个订单至多被服务一次，目标为链上车费之和最大，这是车辆调度问题的流模型\cite{bunte2009overview}。取 $\bar p=0$（接驾耗时松弛为 0）并求 LP 松弛，得到\textbf{上界} UB：任何在线或离线策略的收入都不会超过它。取 $\bar p=R$（接驾按最坏情况计），求整数解（HiGHS，等待上限 200 分钟），得到一个必然可执行的事后计划，作为事后最优的\textbf{下界} LB。每个计划都在仿真器中逐单回放，回放收入与 LB 完全一致，以此验证可执行性。受算力限制，该实验只取 $\Dt\in\{10,30\}$ 分钟、每种设置 5 个测试日（与实验一的前 5 个测试日相同，可以配对比较）。
+
+\subsection{拓展 D：价值目标的乐观度谱}\label{sec:expectile}
+
+实验三的结论是“max 目标导致崩溃，期望目标可以消除”。为了弄清楚两者之间发生了什么，借鉴离线强化学习 IQL\cite{kostrikov2022offline}中的期望分位回归\cite{newey1987asymmetric}，把表格目标推广为非对称加权的 TD 更新：
+\begin{gather}
+V(s)\leftarrow V(s)+\alpha\,w_\tau(\delta)\,\delta,\\
+w_\tau(\delta)=\frac{1}{\max(\tau,1-\tau)}\times
+\begin{cases}
+\tau, & \delta>0,\\
+1-\tau, & \delta\le0,
+\end{cases}
+\end{gather}
+其中 $\delta=r+\gamma^{\Delta}V(s')-V(s)$ 为 TD 误差。$\tau=0.5$ 时两侧权重相等，即 PE-KM；$\tau\to1$ 时只吸收正误差，目标趋向后继回报的上确界，越来越乐观。除以 $\max(\tau,1-\tau)$ 保证有效步长 $\alpha w_\tau\le\alpha$，避免 $\tau$ 较大时发散。
+
+实验取 $\tau\in\{0.5,0.6,0.7,0.8,0.9,0.95\}$，并加上 max 目标作对照，每种设置训练 3 个种子。诊断量有两个：(1) 沿每个司机的真实轨迹回溯折扣回报 $G$，以 $(V-G)/G$ 度量价值表的高估程度；(2) $\beta=1$ 派单时，把边权中的长期项拆成出发价值 $\gamma^{\Delta}V(t{+}\Delta,k)$ 与等待价值 $\gamma V(t{+}1,i)$，分别统计。

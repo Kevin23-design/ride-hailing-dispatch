@@ -1,0 +1,131 @@
+\section{实验}
+
+\subsection{实验设置}
+
+全部代码在一组参数化的 Python 模块中实现（\texttt{report/code}）。表格方法与进化算法在 48 核服务器上多进程运行，DV-KM 在 RTX 3090 上训练，精确前沿用 HiGHS 求解。实验一共有 $6(\Dt)\times3(\text{车队})\times5(\text{种子})=90$ 个 Q-KM 训练任务。三种策略在相同的 10 个测试日上评估，测试日由测试期订单池生成，在各 $\Dt$ 与各策略之间共用，以便配对比较。显著性检验用双侧 Wilcoxon 符号秩检验：Q-KM 先对 5 个种子取均值，再与基线按测试日配对，$n=10$。表中 $^{*}$、$^{**}$、$^{***}$ 分别表示 $p<0.05$、$0.01$、$0.001$。
+
+\subsection{实验一：多批次间隔下的收入对比}
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\textwidth]{fig/exp1_revenue_dt.pdf}
+	\caption{不同批次间隔 $\Dt$ 下三种策略的全天收入（10 个测试日均值，阴影为 95\% 置信区间）}
+	\label{fig:exp1}
+\end{figure*}
+
+\begin{table}[t]
+	\centering
+	\caption{Q-KM 相对 KM 即时收入 / 最近贪心的收入增益（\%）}
+	\label{tab:exp1gain}
+	\small
+	\setlength{\tabcolsep}{3.2pt}
+	\begin{tabular}{c rr rr rr}
+		\toprule
+		& \multicolumn{2}{c}{40 辆} & \multicolumn{2}{c}{60 辆} & \multicolumn{2}{c}{100 辆} \\
+		\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+		$\Dt$/min & vs KM & vs 贪心 & vs KM & vs 贪心 & vs KM & vs 贪心 \\
+		\midrule
+		\tabinput{tables/exp1_gain.tex}
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\begin{table}[t]
+	\centering
+	\caption{$\Dt=10$ min、60 辆车时的详细指标（10 个测试日均值；收入后为 95\% 置信区间半宽）}
+	\label{tab:exp1detail}
+	\small
+	\setlength{\tabcolsep}{2.6pt}
+	\resizebox{\columnwidth}{!}{\begin{tabular}{lccccc}
+		\toprule
+		策略 & 收入/元 & 送客/km & 应答率/\% & 接驾/km & 响应/min \\
+		\midrule
+		\tabinput{tables/exp1_detail.tex}
+		\bottomrule
+	\end{tabular}}
+\end{table}
+
+\Cref{fig:exp1} 和\cref{tab:exp1gain} 给出了 18 种设置下的结果，可以归纳出以下几点。
+
+\textbf{(1) 运力越紧张，长期价值越重要。} 40 辆车时，Q-KM 相对 KM 即时收入在各 $\Dt$ 下增收 6.7\%–12.4\%，60 辆车时增收 2.4\%–5.4\%，均显著。100 辆车时，Q-KM 与 KM 的差距在 $\pm$2.1\% 以内，6 种设置中只有 2 种显著，而且都是 Q-KM 略低。此时验证集选出的 $\beta$ 均落在最小档 0.2–0.4，说明运力充足时到处都有空车，区域价值差异提供的信息很少。
+
+\textbf{(2) KM 即时收入在运力紧张时不如最近贪心。} 40 辆、$\Dt=10$ 时，KM 即时收入为 \num{12494} 元，最近贪心为 \num{13050} 元。只看本批次车费的匹配偏向长途单，长途单把司机带离热点区域，空车又不会自行返回。Q-KM 的边权中包含 $\gamma V(t{+}1,i)$ 一项，代表“司机留在原地”的机会成本，这一缺陷由此得到修正（\cref{tab:exp1detail}：应答率从 59.0\% 升至 65.4\%）。
+
+\textbf{(3) 批次间隔的影响。} 三种策略的收入都随 $\Dt$ 增大而单调下降，从 $\Dt=20$ 到 $\Dt=30$ 骤降 23\%–31\%。原因是订单耐心只有 20 分钟，比批次间隔还短，大量订单在下一批次执行前就已取消。另一方面，$\Dt$ 增大时 Q-KM 相对最近贪心的优势也在扩大（40 辆时从 2.1\% 升到 10.1\%）：批次越大，候选匹配越多，价值引导的选择余地也越大。$\Dt=2$–5 分钟时收入最高，平均响应时间（等待 + 接驾）也最短，是三者之间较好的折中。
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\textwidth]{fig/exp1_hourly_curve.pdf}
+	\caption{左：$\Dt=10$ min、60 辆车时按小时分解的收入；右：Q-KM 在验证日上的学习曲线（5 个种子）}
+	\label{fig:hourly}
+\end{figure*}
+
+\textbf{(4) 收入从何而来。} 按小时分解（\cref{fig:hourly} 左）后可以看到，Q-KM 在 7:00–15:00 的收入反而比 KM 低 0.2\%–8.1\%：它会拒绝把司机派往冷区的高价订单，宁可让司机留在原地。到了 16:00 之后，Q-KM 的收入持续领先，18:00–22:00 时段高出 16\%–47\%。也就是说，Q-KM 的增益是\textbf{跨时段的}：白天保持车辆的空间分布，换来晚高峰更多的可用运力。批次级的贪心与 KM 只看当前批次，无法做出这种跨时段的取舍。学习曲线显示，训练约 25 个模拟日后验证收入即趋于稳定，最终验证收入在 5 个种子之间的极差约为 1.9\%。
+
+\subsection{实验二：双目标帕累托前沿}
+
+\input{texfiles/4b.前沿.tex}
+
+\subsection{拓展实验 B：DV-KM 深度价值网络}
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\textwidth]{fig/exp3_beta.pdf}
+	\caption{长期价值权重 $\beta$ 对全天收入的影响（$\Dt=10$ min，10 个测试日；阴影为 3 个训练种子的极差）}
+	\label{fig:beta}
+\end{figure*}
+
+\begin{table*}[t]
+	\centering
+	\caption{各方法收入（元）。“最佳”列为测试集上的最佳 $\beta$（括号内，仅作上界参考），“$\beta=1$”列为 3 个种子的均值 $\pm$ 标准差}
+	\label{tab:dvkm}
+	\small
+	\setlength{\tabcolsep}{6pt}
+	{\begin{tabular}{l cc cc cc}
+		\toprule
+		& \multicolumn{2}{c}{40 辆} & \multicolumn{2}{c}{60 辆} & \multicolumn{2}{c}{100 辆} \\
+		\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+		方法 & 最佳 & $\beta{=}1$ & 最佳 & $\beta{=}1$ & 最佳 & $\beta{=}1$ \\
+		\midrule
+		\tabinput{tables/exp3_main.tex}
+		\bottomrule
+	\end{tabular}}
+\end{table*}
+
+\Cref{fig:beta} 和\cref{tab:dvkm} 比较了三种价值估计方式，表格 PE-KM 用于分解两个因素的作用。
+
+\textbf{max 目标是 $\beta$ 增大后收入崩溃的主因。} 表格 Q-KM 的收入在 $\beta=0.6$ 附近达到峰值，随后迅速下降。$\beta=1$ 时，60 辆和 100 辆车的收入分别只有 \num{13560} 元和 \num{15252} 元，比 KM 即时收入低 17.6\% 和 27.0\%，应答率从 0.79 跌到 0.63（100 辆）。同样是表格结构，把 TD 目标改成期望型的 PE-KM 后，收入随 $\beta$ 增大基本单调上升或保持平稳，$\beta=1$ 时为 \num{17302} 元和 \num{21145} 元。由此可以判断，崩溃来自 max 自举的过估计，而不是区域离散化。被高估的“原地等待”价值使大量正收益的边权变成负值，KM 便选择不派。拓展 D 将进一步说明，起作用的并不是高估的幅度，而是高估在“等待”与“出发”之间的不对称。
+
+\textbf{深度网络带来鲁棒性，但没有带来更高的收入峰值。} DV-KM 在 3 个车队规模、6 个 $\beta$ 取值下都没有出现崩溃，$\beta=1$ 时种子间的标准差最小（23–56 元）。但它的最佳收入与表格 PE-KM 基本持平（40 辆 \num{13970} 对 \num{14019}，60 辆 \num{17376} 对 \num{17487}），100 辆时还低约 1.1\%。原因在于，本仿真中订单量与区域划分的比例使 $8\times8$ 表格的每个状态都有充足的样本，连续坐标的精细度没有可利用的空间。可以预期，在更细的空间粒度或样本更稀疏的城市中，函数逼近的泛化能力才会体现为收入优势。
+
+\begin{table}[t]
+	\centering
+	\caption{DV-KM 消融（60 辆，同一份 175 万条经验，收入/元）}
+	\label{tab:ablation}
+	\small
+	\setlength{\tabcolsep}{2.2pt}
+	\begin{tabular}{lccccc}
+		\toprule
+		变体 \textbackslash\ $\beta$ & 0.2 & 0.4 & 0.6 & 0.8 & 1.0 \\
+		\midrule
+		\tabinput{tables/exp3_ablation.tex}
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\textbf{平滑正则是网络稳定的关键。} \Cref{tab:ablation} 中，用相同数据重新训练（仅随机初始化不同）引起的波动约 1.2\%；去掉粗编码后收入下降不超过 0.7\%，与这一波动处于同一量级。去掉平滑正则后，收入在 $\beta=0.4$ 时达到全表最高的 \num{17585} 元，但 $\beta\ge0.8$ 时跌回 \num{15744}/\num{14794} 元，与表格 Q-KM 的崩溃形态相同。缺少空间平滑时，网络在样本稀疏的位置会外推出虚高的价值，作用与 max 偏差类似。这与 CVNet\cite{tang2019deep}强调 Lipschitz 约束的动机一致。
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=0.92\textwidth]{fig/exp3_vmap.pdf}
+	\caption{DV-KM 学到的连续价值函数 $V_\theta(\tau,x,y)$（60 辆车，灰点为训练期签到点）}
+	\label{fig:vmap}
+\end{figure*}
+
+\Cref{fig:vmap} 展示了学到的价值面：13:00–18:00 曼哈顿中城与下城（$x\approx5$–10\,km，$y\approx12$–20\,km）的价值最高；8:00 时价值分布较分散，高值区尚未集中；22:00 整体价值趋近于 0，因为营业即将结束，剩余可赚的时间很短。价值面在空间上连续平滑，没有表格方法在网格边界处的阶跃。
+
+\input{texfiles/4c.事后.tex}
+
+\input{texfiles/4d.乐观度.tex}
+
+\input{texfiles/4e.系统级.tex}

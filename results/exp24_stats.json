@@ -1,0 +1,21 @@
+{
+ "friedman_p": 2.8797735085196086e-11,
+ "cd": 1.0487898582016641,
+ "ranks": {
+  "NSGA-II": 2.1,
+  "NSGA-III": 3.2,
+  "\u52a0\u6743\u548c KM": 3.7,
+  "NSGA-II+KM \u521d\u59cb\u5316": 1.0
+ },
+ "wil_init_vs_n2": 1.9073486328125e-06,
+ "wil_n2_vs_ws": 3.814697265625e-06,
+ "wil_n2_vs_n3": 3.814697265625e-06,
+ "n_exact_mean": 445.2,
+ "n_exact_min": 306,
+ "n_exact_max": 593,
+ "sup_frac_mean": 0.09959756383709242,
+ "sup_frac_min": 0.07956600361663653,
+ "sup_frac_max": 0.1437908496732026,
+ "n_sup_mean": 43.5,
+ "ws_points": 21.45
+}

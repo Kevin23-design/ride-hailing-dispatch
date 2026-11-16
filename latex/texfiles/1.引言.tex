@@ -1,0 +1,13 @@
+\section{引言}
+
+网约车平台每隔一个批次间隔 $\Dt$ 把空闲司机与待派订单组成二部图并求解匹配。这一决策同时面对两类冲突：其一是\textbf{时间上的冲突}，当前批次收入最高的匹配会把司机送到需求稀疏的区域，从而损失后续收入，这是序贯决策问题\cite{xu2018large,tang2019deep}；其二是\textbf{目标间的冲突}，平台希望多派长途单（收入高），乘客希望接驾距离短，两者一般不存在同时最优解，只能求帕累托前沿\cite{deb2002fast}。
+
+本报告基于 Foursquare 纽约签到数据\cite{yang2015modeling}构造的订单仿真，完成三项工作，并对每项结论给出统计检验：
+
+\begin{enumerate}[(1)]
+	\item \textbf{多批次间隔下的收入对比。} 在 $\Dt\in\{2,5,10,15,20,30\}$ 分钟与 40/60/100 辆车的 18 种设置下，比较最近贪心、KM 即时收入匹配\cite{kuhn1955hungarian}与 Q-KM\cite{xu2018large}的全天收入，并按小时分解收入来源。
+	\item \textbf{双目标帕累托前沿。} 以总送客距离表示平台收入、以总接驾距离表示乘客成本，在 20 个批次上比较 NSGA-II\cite{deb2002fast}、NSGA-III\cite{deb2014evolutionary}、加权和 KM 及 KM 混合初始化的 NSGA-II。
+	\item \textbf{拓展实验。} (a) 用增广 $\varepsilon$-约束整数规划\cite{haimes1971bicriterion,mavrotas2009effective}求出每个批次的\textbf{精确}帕累托前沿并逐点验证，以此为真值，用 IGD$^+$\cite{ishibuchi2015modified}和 Friedman 检验\cite{demsar2006statistical}评估各近似算法。(b) 参考 CVNet\cite{tang2019deep}提出连续时空深度价值网络 DV-KM，用分解实验定位 Q-KM 在大 $\beta$ 下收入崩溃的原因。(c) 用时间扩展网络求全天\textbf{事后最优}的上下界，量化在线策略的短视代价。(d) 借鉴 IQL\cite{kostrikov2022offline}的期望分位目标，构造从“策略评估”到“max”的乐观度谱，检验高估如何导致崩溃。(e) 检验批次级的“收入–接驾”前沿在全天系统层面是否成立。
+\end{enumerate}
+
+主要发现：车辆不足（40/60 辆）时，Q-KM 在全部 12 种设置下都显著优于 KM 即时收入匹配，在其中 11 种设置下显著优于最近贪心（Wilcoxon，$p<0.05$），增收主要来自晚高峰\HINDSIGHTINTRO。真实帕累托前沿上仅约 \supfrac 的点是支撑解，加权和 KM 最多只能找到这部分点；KM 初始化把 NSGA-II 的 IGD$^+$ 降低约 \initgain。Q-KM 在大 $\beta$ 下的崩溃不取决于价值高估的幅度，而取决于高估在“等待”与“出发”之间的不对称：期望分位目标的高估可以比 max 更大，却不会崩溃。最后，批次级前沿会高估全天层面的权衡代价：取很小的接驾惩罚，即可在收入变化不超过 1.2\% 的前提下把全天接驾距离缩短 8\%–35\%。

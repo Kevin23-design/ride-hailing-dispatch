@@ -1,0 +1,7 @@
+[f100_s1     58s] Tab-Q-KM done
+[f100_s1    110s] Tab-PE-KM done
+[f100_s1    118s] round0 data 1352261
+[f100_s1    187s] round1 data 2256143 loss 1.897
+[f100_s1    233s] round2 data 3165827 loss 1.901
+[f100_s1    238s] DV-KM eval done
+[f100_s1    238s] all done

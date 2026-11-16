@@ -1,0 +1,184 @@
+\documentclass[twocolumn]{article}
+\usepackage{xeCJK} % 支持中文
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry} % 设置页边距
+\usepackage{abstract} % 定制摘要
+
+\usepackage{indentfirst} % 设置首行缩进
+
+% 原模板使用 SimSun/SimHei；macOS 无此二字体，改用系统自带宋体/黑体
+\setCJKmainfont{Songti SC}[BoldFont = Heiti SC]
+\setCJKsansfont{Heiti SC}
+\setmainfont{Times New Roman} % 设置英文字体
+
+
+% =================================
+% 数学与公式
+% =================================
+\usepackage{amsmath}        % AMS 提供的数学公式增强宏包，提供 align, gather 等环境
+\usepackage{amssymb}        % 包含大量数学符号，如 R（实数集）、\lesssim 等
+\usepackage{amsfonts}       % AMS 提供的数学字体，用于特殊字体（如花体字母）
+\usepackage{bm}             % 使公式中的粗体符号（如向量）显示为直立粗体 (\bm)
+
+% =================================
+% 图形、表格与浮动体
+% =================================
+\usepackage{graphicx}       % 引入图片（使用 \includegraphics 命令）
+\usepackage{float}          % 增强对浮动体（图、表）的控制，例如 H 定位符
+\usepackage{booktabs}       % 绘制专业、美观的三线表（使用 \toprule, \midrule, \bottomrule）
+\usepackage{multirow}       % 表格中合并行
+\usepackage{makecell}       % 表格中换行和调整单元格边距
+\usepackage{caption}        % 更好地自定义图表标题格式
+\usepackage{subcaption}     % 在一个浮动体中并排放置多个子图或子表
+
+
+% =================================
+% 链接与排版增强
+% =================================
+\usepackage{hyperref}       % 生成可点击的超链接（目录、引用、参考文献等），通常应最后加载
+\hypersetup{
+	colorlinks=true,        % 彩色链接
+	linkcolor=black,        % 内部链接颜色
+	citecolor=blue,         % 引用链接颜色
+	urlcolor=blue           % URL 链接颜色
+}
+\usepackage{enumerate}      % 增强列表环境（itemize, enumerate），允许自定义标签格式
+
+% =================================
+% 算法
+% =================================
+% 推荐使用下列其中一个宏包：
+\usepackage{algorithm}      % 算法浮动体环境
+\usepackage{algpseudocode}  % 伪代码排版宏包（与 algorithm 配合使用）
+% 或
+% \usepackage[linesnumbered, ruled]{algorithm2e} % 另一种流行的算法排版宏包
+
+
+\usepackage{caption} % 用于定制标题格式
+\usepackage{xpatch}  % 用于修改 \captionname 宏（可选，但推荐用于中文/双语环境）
+
+% 1. 定义一个命令来存储中文的“图”和“表”名称，以配合 xeCJK 的中文环境
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+
+% 2. 使用 caption 宏包定制标题格式：居中对齐，并在编号和文字之间添加空格
+\captionsetup{
+	justification=centering,   % 居中对齐
+	labelsep=quad,             % 标签和文字之间的间距（quad 略大于 space）
+	font=normal,               % 字体设置为正常
+}
+
+
+\usepackage{cleveref} % 交叉引用
+\crefname{figure}{图}{图}
+\Crefname{figure}{图}{图}
+\crefname{table}{表}{表}
+\Crefname{table}{表}{表}
+\crefname{section}{节}{节}
+\Crefname{section}{节}{节}
+\crefname{equation}{公式}{公式}
+\Crefname{equation}{公式}{公式}
+
+
+\usepackage{cite} % 无自动上标，需要手动上标，下方才用重新定义实现
+% =================================
+% 重新定义 \cite 命令为上标（带方括号）
+% =================================
+% 1. 备份原始的 \cite 命令
+\let\oldcite\cite 
+% 2. 重新定义 \cite 命令，将其内容放入 \textsuperscript{}
+\renewcommand*\cite[1]{\textsuperscript{\oldcite{#1}}}
+
+%\usepackage[numbers, super]{natbib} % 无方括号，与cite选用
+
+\usepackage{fancyhdr} % 页眉页脚
+
+
+% 取消摘要环境自带的标题
+\renewcommand{\abstractname}{}
+\renewcommand{\absnamepos}{empty}
+
+\usepackage{siunitx}
+\sisetup{group-separator={,}}
+\setlength{\columnsep}{0.6cm}
+\captionsetup{font=small}
+\setlength{\abovecaptionskip}{3pt}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{6pt plus 2pt minus 2pt}
+\newcommand{\Dt}{\Delta t}
+
+\title{
+	\textbf{网约车派单的长期价值与多目标权衡：\\批次间隔、帕累托前沿与深度价值网络的实验研究} \\
+	\vspace{0.5em} \normalsize 张子扬\quad（学号：10245102456） \\
+	{\small 华东师范大学} \\
+	\vspace{1em}
+	\large \textbf{Long-term Value and Multi-objective Trade-offs in Ride-hailing Dispatch:} \\
+	\large \textbf{An Empirical Study of Batch Intervals, Pareto Fronts and Deep Value Networks} \\
+	\vspace{0.5em} \normalsize Ziyang Zhang \\
+	{\small East China Normal University}
+}
+\date{}
+\renewcommand{\refname}{参考文献}
+\makeatletter\newcommand\tabinput[1]{\@@input #1 }\makeatother
+\input{tables/exp24_macros.tex}
+\input{tables/exp5_macros.tex}
+\begin{document}
+
+\twocolumn[
+\maketitle
+\begin{minipage}{\textwidth}
+	\centering
+	{\noindent \textbf{\large 摘要}}
+	\vspace{0.5em}
+\end{minipage}
+\begin{minipage}{1\textwidth}
+	\setlength{\parindent}{2em}
+	\indent 网约车派单需要同时权衡当前收入与未来供给、平台收入与乘客接驾成本。本文基于 Foursquare 纽约签到数据构造的订单仿真，系统比较了最近贪心、KM 批次匹配与 Q-KM 在 6 种批次间隔 × 3 种车队规模下的全天收入。结果表明：车辆不足时，Q-KM 相对 KM 即时收入匹配显著增收 2.4\%–12.4\%，增益集中在晚高峰；运力充足时三者差距在 2.1\% 以内。在“最大化送客距离 / 最小化接驾距离”的双目标批次派单上，本文用增广 $\varepsilon$-约束整数规划求出并逐点验证了 20 个批次的精确帕累托前沿（平均 \nexact 个非支配点），以此为真值评估 NSGA-II、NSGA-III 与加权和 KM。真实前沿中只有约 \supfrac 是加权和方法可以到达的支撑解；KM 混合初始化使 NSGA-II 的 HV 比达到 \hvinit，Friedman 检验下排名第一。拓展实验提出连续时空深度价值网络 DV-KM，并通过“目标函数 × 函数逼近”的分解实验发现：Q-KM 在大权重下收入崩溃，根源在于 max 自举的过估计，改用期望型策略评估目标即可消除；空间平滑正则是网络稳定的必要条件。进一步借鉴 IQL 的期望分位目标构造乐观度谱，发现崩溃取决于高估在“等待”与“出发”之间的不对称，而非高估幅度。\HINDSIGHTABS 最后，全天仿真表明批次级前沿会把收入–接驾权衡的代价高估数倍：很小的接驾惩罚即可把接驾距离缩短 8\%–35\%，收入变化不超过 1.2\%。代码、数据处理脚本与全部实验结果见 \url{https://github.com/Kevin23-design/ride-hailing-dispatch}。
+\end{minipage}
+\vspace{0.6em}
+
+{\noindent \textbf{关键词：}网约车派单；Q-KM；强化学习；多目标优化；帕累托前沿；$\varepsilon$-约束；深度价值网络}
+\vspace{0.8em}
+
+\begin{minipage}{\textwidth}
+	\centering
+	{\noindent \textbf{\large Abstract}}
+	\vspace{0.5em}
+\end{minipage}
+\begin{minipage}{1\textwidth}
+	\setlength{\parindent}{2em}
+	\indent Using an order simulator built from Foursquare NYC check-ins, we compare nearest-greedy, KM batch matching and Q-KM under 18 settings of batch interval and fleet size. When supply is scarce, Q-KM raises daily revenue by 2.4\%--12.4\% over myopic KM, and most of the gain is realized in the evening peak. For bi-objective batch dispatch, we compute and certify the exact Pareto fronts of 20 batches by an augmented $\varepsilon$-constraint integer program. Only about \supfrac{} of the Pareto-optimal points are supported, which bounds the coverage of any weighted-sum method; NSGA-II seeded with KM solutions ranks first under the Friedman test. Finally, we propose DV-KM, a continuous spatio-temporal value network. Its factorial ablation shows that the collapse of Q-KM at large $\beta$ comes from max-operator overestimation rather than spatial discretization, and that a smoothness regularizer is essential for stability. An expectile spectrum reveals that what breaks Q-KM is not the size of the overestimation but its asymmetry between waiting and serving. \HINDSIGHTABSEN{} Finally, batch-level fronts overstate the system-level cost: a small pickup penalty shortens total pickup distance by 8\%--35\% with at most 1.2\% revenue change. Code and results are available at \url{https://github.com/Kevin23-design/ride-hailing-dispatch}.
+\end{minipage}
+\vspace{0.6em}
+
+{\noindent \textbf{Keywords:} order dispatching; Q-KM; reinforcement learning; multi-objective optimization; Pareto front; deep value network}
+\vspace{0.8em}
+]
+\input{texfiles/1.引言.tex}
+\input{texfiles/2.相关工作.tex}
+\input{texfiles/3.方法.tex}
+\input{texfiles/4.实验.tex}
+\input{texfiles/5.结论.tex}
+\begin{thebibliography}{99}
+\small
+\setlength{\itemsep}{0pt}
+\bibitem{xu2018large} Xu Z, Li Z, Guan Q, et al. Large-scale order dispatch in on-demand ride-hailing platforms: A learning and planning approach[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining. 2018: 905--913.
+\bibitem{tang2019deep} Tang X, Qin Z, Zhang F, et al. A deep value-network based approach for multi-driver order dispatching[C]//Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining. 2019: 1780--1790.
+\bibitem{deb2002fast} Deb K, Pratap A, Agarwal S, et al. A fast and elitist multiobjective genetic algorithm: NSGA-II[J]. IEEE Transactions on Evolutionary Computation, 2002, 6(2): 182--197.
+\bibitem{deb2014evolutionary} Deb K, Jain H. An evolutionary many-objective optimization algorithm using reference-point-based nondominated sorting approach, part I: Solving problems with box constraints[J]. IEEE Transactions on Evolutionary Computation, 2014, 18(4): 577--601.
+\bibitem{kuhn1955hungarian} Kuhn H W. The Hungarian method for the assignment problem[J]. Naval Research Logistics Quarterly, 1955, 2(1--2): 83--97.
+\bibitem{tong2016online} Tong Y, She J, Ding B, et al. Online mobile micro-task allocation in spatial crowdsourcing[C]//2016 IEEE 32nd International Conference on Data Engineering (ICDE). 2016: 49--60.
+\bibitem{watkins1992q} Watkins C J C H, Dayan P. Q-learning[J]. Machine Learning, 1992, 8(3): 279--292.
+\bibitem{hasselt2010double} van Hasselt H. Double Q-learning[C]//Advances in Neural Information Processing Systems 23. 2010: 2613--2621.
+\bibitem{haimes1971bicriterion} Haimes Y Y, Lasdon L S, Wismer D A. On a bicriterion formulation of the problems of integrated system identification and system optimization[J]. IEEE Transactions on Systems, Man, and Cybernetics, 1971, SMC-1(3): 296--297.
+\bibitem{mavrotas2009effective} Mavrotas G. Effective implementation of the $\varepsilon$-constraint method in multi-objective mathematical programming problems[J]. Applied Mathematics and Computation, 2009, 213(2): 455--465.
+\bibitem{zitzler1999multiobjective} Zitzler E, Thiele L. Multiobjective evolutionary algorithms: A comparative case study and the strength Pareto approach[J]. IEEE Transactions on Evolutionary Computation, 1999, 3(4): 257--271.
+\bibitem{ishibuchi2015modified} Ishibuchi H, Masuda H, Tanigaki Y, et al. Modified distance calculation in generational distance and inverted generational distance[C]//Evolutionary Multi-Criterion Optimization (EMO 2015). Springer, 2015: 110--125.
+\bibitem{demsar2006statistical} Dem\v{s}ar J. Statistical comparisons of classifiers over multiple data sets[J]. Journal of Machine Learning Research, 2006, 7: 1--30.
+\bibitem{huangfu2018parallelizing} Huangfu Q, Hall J A J. Parallelizing the dual revised simplex method[J]. Mathematical Programming Computation, 2018, 10(1): 119--142.
+\bibitem{yang2015modeling} Yang D, Zhang D, Zheng V W, et al. Modeling user activity preference by leveraging user spatial temporal characteristics in LBSNs[J]. IEEE Transactions on Systems, Man, and Cybernetics: Systems, 2015, 45(1): 129--142.
+\bibitem{kostrikov2022offline} Kostrikov I, Nair A, Levine S. Offline reinforcement learning with implicit Q-learning[C]//International Conference on Learning Representations (ICLR). 2022.
+\bibitem{newey1987asymmetric} Newey W K, Powell J L. Asymmetric least squares estimation and testing[J]. Econometrica, 1987, 55(4): 819--847.
+\bibitem{bunte2009overview} Bunte S, Kliewer N. An overview on vehicle scheduling models[J]. Public Transport, 2009, 1(4): 299--317.
+\bibitem{castillo2017surge} Castillo J C, Knoepfle D, Weyl G. Surge pricing solves the wild goose chase[C]//Proceedings of the 2017 ACM Conference on Economics and Computation (EC). 2017: 241--242.
+\end{thebibliography}
+\end{document}

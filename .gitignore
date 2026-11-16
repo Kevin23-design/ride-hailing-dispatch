@@ -1,0 +1,14 @@
+.DS_Store
+._*
+__pycache__/
+*.pyc
+results/_data_cache.pkl
+data/
+latex/*.aux
+latex/*.log
+latex/*.out
+latex/*.fls
+latex/*.fdb_latexmk
+latex/*.xdv
+latex/*.synctex.gz
+latex/build.log

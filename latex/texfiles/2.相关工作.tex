@@ -1,0 +1,9 @@
+\section{相关工作}
+
+\textbf{在线与批次派单。} 阈值贪心（TBG）按到达顺序逐单分配，在对抗输入下有竞争比保证\cite{tong2016online}。批次匹配在每个 $\Dt$ 内用 KM（匈牙利）算法\cite{kuhn1955hungarian}求最优二部匹配，以一定的等待换取更好的匹配质量。
+
+\textbf{长期价值派单。} Xu 等\cite{xu2018large}把整个平台视为一个智能体，在“时间片 × 区域”上学习状态价值，并把“即时收入 + 价值增量”作为 KM 边权，即 Q-KM。Tang 等\cite{tang2019deep}提出 CVNet，用层次粗编码与 Lipschitz 正则的神经网络在连续时空上逼近价值函数。Q-learning\cite{watkins1992q}中的 max 自举会带来正偏差，Double Q-learning\cite{hasselt2010double}专门针对这一问题；离线强化学习中的 IQL\cite{kostrikov2022offline}则用期望分位回归\cite{newey1987asymmetric}在“策略评估”与“取 max”之间连续插值，避免对未见动作的过度乐观。
+
+\textbf{多目标优化。} NSGA-II\cite{deb2002fast}以非支配排序和拥挤距离维持前沿多样性，NSGA-III\cite{deb2014evolutionary}改用参考方向引导的小生境保留。线性加权和只能得到前沿凸包上的支撑解，$\varepsilon$-约束法\cite{haimes1971bicriterion}及其增广版本 AUGMECON\cite{mavrotas2009effective}则可以枚举整数规划的全部非支配点。近似前沿的质量常用 HV\cite{zitzler1999multiobjective}与 IGD$^+$\cite{ishibuchi2015modified}衡量。
+
+\textbf{离线最优与系统级效应。} 若事先知道全部订单，全天派单可写成车辆调度问题的时间扩展网络流\cite{bunte2009overview}，其最优值是在线算法的天然参照。经济学研究指出，接驾距离过长会让运力消耗在空驶上，形成“空驶追单”（wild goose chase）\cite{castillo2017surge}，因此单批次上的收入–接驾权衡未必反映系统层面的真实代价。

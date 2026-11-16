@@ -1,0 +1,9 @@
+[f60_s0     34s] Tab-Q-KM done
+[f60_s0     63s] Tab-PE-KM done
+[f60_s0     70s] round0 data 744946
+[f60_s0    115s] round1 data 1246077 loss 2.867
+[f60_s0    155s] round2 data 1747858 loss 2.848
+[f60_s0    159s] DV-KM eval done
+[f60_s0    198s] DV-KM 无平滑正则 done
+[f60_s0    224s] DV-KM 无粗编码 done
+[f60_s0    287s] all done

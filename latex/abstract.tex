@@ -1,0 +1,32 @@
+\begin{document}
+
+\twocolumn[
+\maketitle
+\begin{minipage}{\textwidth}
+	\centering
+	{\noindent \textbf{\large 摘要}}
+	\vspace{0.5em}
+\end{minipage}
+\begin{minipage}{1\textwidth}
+	\setlength{\parindent}{2em}
+	\indent 网约车派单需要同时权衡当前收入与未来供给、平台收入与乘客接驾成本。本文基于 Foursquare 纽约签到数据构造的订单仿真，系统比较了最近贪心、KM 批次匹配与 Q-KM 在 6 种批次间隔 × 3 种车队规模下的全天收入。结果表明：车辆不足时，Q-KM 相对 KM 即时收入匹配显著增收 2.4\%–12.4\%，增益集中在晚高峰；运力充足时三者差距在 2.1\% 以内。在“最大化送客距离 / 最小化接驾距离”的双目标批次派单上，本文用增广 $\varepsilon$-约束整数规划求出并逐点验证了 20 个批次的精确帕累托前沿（平均 \nexact 个非支配点），以此为真值评估 NSGA-II、NSGA-III 与加权和 KM。真实前沿中只有约 \supfrac 是加权和方法可以到达的支撑解；KM 混合初始化使 NSGA-II 的 HV 比达到 \hvinit，Friedman 检验下排名第一。拓展实验提出连续时空深度价值网络 DV-KM，并通过“目标函数 × 函数逼近”的分解实验发现：Q-KM 在大权重下收入崩溃，根源在于 max 自举的过估计，改用期望型策略评估目标即可消除；空间平滑正则是网络稳定的必要条件。进一步借鉴 IQL 的期望分位目标构造乐观度谱，发现崩溃取决于高估在“等待”与“出发”之间的不对称，而非高估幅度。\HINDSIGHTABS 最后，全天仿真表明批次级前沿会把收入–接驾权衡的代价高估数倍：很小的接驾惩罚即可把接驾距离缩短 8\%–35\%，收入变化不超过 1.2\%。代码、数据处理脚本与全部实验结果见 \url{https://github.com/Kevin23-design/ride-hailing-dispatch}。
+\end{minipage}
+\vspace{0.6em}
+
+{\noindent \textbf{关键词：}网约车派单；Q-KM；强化学习；多目标优化；帕累托前沿；$\varepsilon$-约束；深度价值网络}
+\vspace{0.8em}
+
+\begin{minipage}{\textwidth}
+	\centering
+	{\noindent \textbf{\large Abstract}}
+	\vspace{0.5em}
+\end{minipage}
+\begin{minipage}{1\textwidth}
+	\setlength{\parindent}{2em}
+	\indent Using an order simulator built from Foursquare NYC check-ins, we compare nearest-greedy, KM batch matching and Q-KM under 18 settings of batch interval and fleet size. When supply is scarce, Q-KM raises daily revenue by 2.4\%--12.4\% over myopic KM, and most of the gain is realized in the evening peak. For bi-objective batch dispatch, we compute and certify the exact Pareto fronts of 20 batches by an augmented $\varepsilon$-constraint integer program. Only about \supfrac{} of the Pareto-optimal points are supported, which bounds the coverage of any weighted-sum method; NSGA-II seeded with KM solutions ranks first under the Friedman test. Finally, we propose DV-KM, a continuous spatio-temporal value network. Its factorial ablation shows that the collapse of Q-KM at large $\beta$ comes from max-operator overestimation rather than spatial discretization, and that a smoothness regularizer is essential for stability. An expectile spectrum reveals that what breaks Q-KM is not the size of the overestimation but its asymmetry between waiting and serving. \HINDSIGHTABSEN{} Finally, batch-level fronts overstate the system-level cost: a small pickup penalty shortens total pickup distance by 8\%--35\% with at most 1.2\% revenue change. Code and results are available at \url{https://github.com/Kevin23-design/ride-hailing-dispatch}.
+\end{minipage}
+\vspace{0.6em}
+
+{\noindent \textbf{Keywords:} order dispatching; Q-KM; reinforcement learning; multi-objective optimization; Pareto front; deep value network}
+\vspace{0.8em}
+]

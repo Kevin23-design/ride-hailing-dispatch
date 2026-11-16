@@ -1,0 +1,99 @@
+\documentclass[twocolumn]{article}
+\usepackage{xeCJK} % 支持中文
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry} % 设置页边距
+\usepackage{abstract} % 定制摘要
+
+\usepackage{indentfirst} % 设置首行缩进
+
+% 原模板使用 SimSun/SimHei；macOS 无此二字体，改用系统自带宋体/黑体
+\setCJKmainfont{Songti SC}[BoldFont = Heiti SC]
+\setCJKsansfont{Heiti SC}
+\setmainfont{Times New Roman} % 设置英文字体
+
+
+% =================================
+% 数学与公式
+% =================================
+\usepackage{amsmath}        % AMS 提供的数学公式增强宏包，提供 align, gather 等环境
+\usepackage{amssymb}        % 包含大量数学符号，如 R（实数集）、\lesssim 等
+\usepackage{amsfonts}       % AMS 提供的数学字体，用于特殊字体（如花体字母）
+\usepackage{bm}             % 使公式中的粗体符号（如向量）显示为直立粗体 (\bm)
+
+% =================================
+% 图形、表格与浮动体
+% =================================
+\usepackage{graphicx}       % 引入图片（使用 \includegraphics 命令）
+\usepackage{float}          % 增强对浮动体（图、表）的控制，例如 H 定位符
+\usepackage{booktabs}       % 绘制专业、美观的三线表（使用 \toprule, \midrule, \bottomrule）
+\usepackage{multirow}       % 表格中合并行
+\usepackage{makecell}       % 表格中换行和调整单元格边距
+\usepackage{caption}        % 更好地自定义图表标题格式
+\usepackage{subcaption}     % 在一个浮动体中并排放置多个子图或子表
+
+
+% =================================
+% 链接与排版增强
+% =================================
+\usepackage{hyperref}       % 生成可点击的超链接（目录、引用、参考文献等），通常应最后加载
+\hypersetup{
+	colorlinks=true,        % 彩色链接
+	linkcolor=black,        % 内部链接颜色
+	citecolor=blue,         % 引用链接颜色
+	urlcolor=blue           % URL 链接颜色
+}
+\usepackage{enumerate}      % 增强列表环境（itemize, enumerate），允许自定义标签格式
+
+% =================================
+% 算法
+% =================================
+% 推荐使用下列其中一个宏包：
+\usepackage{algorithm}      % 算法浮动体环境
+\usepackage{algpseudocode}  % 伪代码排版宏包（与 algorithm 配合使用）
+% 或
+% \usepackage[linesnumbered, ruled]{algorithm2e} % 另一种流行的算法排版宏包
+
+
+\usepackage{caption} % 用于定制标题格式
+\usepackage{xpatch}  % 用于修改 \captionname 宏（可选，但推荐用于中文/双语环境）
+
+% 1. 定义一个命令来存储中文的“图”和“表”名称，以配合 xeCJK 的中文环境
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+
+% 2. 使用 caption 宏包定制标题格式：居中对齐，并在编号和文字之间添加空格
+\captionsetup{
+	justification=centering,   % 居中对齐
+	labelsep=quad,             % 标签和文字之间的间距（quad 略大于 space）
+	font=normal,               % 字体设置为正常
+}
+
+
+\usepackage{cleveref} % 交叉引用
+\crefname{figure}{图}{图}
+\Crefname{figure}{图}{图}
+\crefname{table}{表}{表}
+\Crefname{table}{表}{表}
+\crefname{section}{节}{节}
+\Crefname{section}{节}{节}
+\crefname{equation}{公式}{公式}
+\Crefname{equation}{公式}{公式}
+
+
+\usepackage{cite} % 无自动上标，需要手动上标，下方才用重新定义实现
+% =================================
+% 重新定义 \cite 命令为上标（带方括号）
+% =================================
+% 1. 备份原始的 \cite 命令
+\let\oldcite\cite 
+% 2. 重新定义 \cite 命令，将其内容放入 \textsuperscript{}
+\renewcommand*\cite[1]{\textsuperscript{\oldcite{#1}}}
+
+%\usepackage[numbers, super]{natbib} % 无方括号，与cite选用
+
+\usepackage{fancyhdr} % 页眉页脚
+
+
+% 取消摘要环境自带的标题
+\renewcommand{\abstractname}{}
+\renewcommand{\absnamepos}{empty}
+
